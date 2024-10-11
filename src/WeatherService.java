@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Scanner;
 
 public class WeatherService {
 
@@ -11,18 +12,32 @@ public class WeatherService {
 
     public static void main(String[] args) {
 
+        Scanner scanner = new Scanner(System.in);
+
         try {
             String jsonResponse = sendGetRequest();
             System.out.println("Ответ от сервиса: " + jsonResponse);
             int currentTemperature = extractCurrentTemperature(jsonResponse);
             System.out.println("Текущая температура: " + currentTemperature + "°C");
-            int[] temperatures = {7,8,8,4,14,13,11,9,7};
-            double averageTemp = calculateAverageTemperature(temperatures);
-            System.out.println("Средняя температура: " + averageTemp + "°C");
+            double[] averageTemp = new double[5];
+            for (int i = 0; i < averageTemp.length; i++) {
+                System.out.print("Введите температуру за " + (i + 1) + " день: ");
+                averageTemp[i] = scanner.nextDouble();
+            }
+
+            double sum = 0;
+            for (double temp : averageTemp) {
+                sum += temp;
+            }
+            double average = sum / averageTemp.length;
+
+            System.out.printf("Средняя температура за 5 дней: %.2f%n", average);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        scanner.close();
     }
 
     private static String sendGetRequest() throws IOException {
@@ -47,13 +62,5 @@ public class WeatherService {
         int startIndex = jsonResponse.indexOf(tempKey) + tempKey.length();
         int endIndex = jsonResponse.indexOf(",", startIndex);
         return Integer.parseInt(jsonResponse.substring(startIndex, endIndex));
-    }
-
-    private static double calculateAverageTemperature(int[] temperatures) {
-        int sum = 0;
-        for (int temp : temperatures) {
-            sum += temp;
-        }
-        return (double) sum / temperatures.length;
     }
 }
